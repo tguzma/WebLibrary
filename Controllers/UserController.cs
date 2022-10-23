@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Exchange.WebServices.Data;
+using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WebLibrary.Models;
@@ -51,12 +54,21 @@ namespace WebLibrary.Controllers
                 var role = await _roleManager.FindByNameAsync("Customer");
                 var customers = await _userService.GetUsersByRoleAsync(role.Id);
 
-                return View(customers);
+                return View(customers.Where(x => !x.EmailConfirmed));
             }
 
             return RedirectToAction("Index", "Home");
         }
 
+        [HttpPost("Approve")]
+        public async Task<ActionResult> ApproveAccount(Guid userId) //TODO make this work
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            user.EmailConfirmed = true;
+            await _userManager.UpdateAsync(user);
+
+            return RedirectToAction("ApproveAccountIndex");
+        }
         // POST: UserController/Create
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]

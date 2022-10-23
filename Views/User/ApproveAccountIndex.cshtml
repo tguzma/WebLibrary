@@ -39,7 +39,7 @@
                 @Html.DisplayFor(modelItem => item.UserName)
             </td>
             <td>
-                @Html.ActionLink("Approve", "Approve", "User",null, new { @class = "btn btn-primary" })
+                @Html.ActionLink("Approve", "Approve", "User", new { item.Id }, new { @class = "btn btn-primary" })
             </td>
         </tr>
 }
