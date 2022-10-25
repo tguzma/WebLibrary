@@ -1,14 +1,11 @@
-﻿
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Exchange.WebServices.Data;
 using System;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using WebLibrary.Models;
 using WebLibrary.Services;
+using WebLibrary.Utils;
 
 namespace WebLibrary.Controllers
 {
@@ -33,43 +30,59 @@ namespace WebLibrary.Controllers
         }
 
         [HttpGet("Register")]
-        public ActionResult RegisterIndex()
+        public ActionResult Register()
         {
             return View();
         }
 
         [HttpGet("Login")]
-        public ActionResult LoginIndex()
+        public ActionResult Login()
         {
             return View();
         }
 
-        [HttpGet("ApproveAccounts")]
-        public async Task <ActionResult> ApproveAccountIndex()
+        [HttpGet("Edit")]
+        public async Task<ActionResult> Edit(Guid? id = null)
         {
-            var user = _signInManager.Context.User;
+            var user = await (id.HasValue ?  _userManager.FindByIdAsync(id.ToString()) : _userManager.GetUserAsync(_signInManager.Context.User));
 
-            if (user.IsInRole("Librarian"))
+            return View("AccountSettings", user);
+        }
+
+        [HttpGet("UserManagement")]
+        public async Task<ActionResult> UserManagement()
+        {
+            if (IsLibrarian())
             {
-                var role = await _roleManager.FindByNameAsync("Customer");
+                var role = await _roleManager.FindByNameAsync(Constants.Customer);
                 var customers = await _userService.GetUsersByRoleAsync(role.Id);
 
-                return View(customers.Where(x => !x.EmailConfirmed));
+                return View(customers);
             }
 
             return RedirectToAction("Index", "Home");
         }
 
         [HttpPost("Approve")]
-        public async Task<ActionResult> ApproveAccount(Guid userId) //TODO make this work
+        public async Task<ActionResult> Approve(Guid userId) 
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
-            user.EmailConfirmed = true;
+            user.IsApproved = true;
             await _userManager.UpdateAsync(user);
 
-            return RedirectToAction("ApproveAccountIndex");
+            return Ok();
         }
-        // POST: UserController/Create
+
+        [HttpPost("Ban")]
+        public async Task<ActionResult> Ban(Guid userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            user.IsBanned = !user.IsBanned;
+            await _userManager.UpdateAsync(user);
+
+            return Ok(user.IsBanned);
+        }
+
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(User user)
@@ -79,14 +92,49 @@ namespace WebLibrary.Controllers
                 return BadRequest();
             }
 
-            var librarians = await _userManager.GetUsersInRoleAsync("Librarian");
+            if (IsLibrarian())
+            {
+                user.IsApproved = true;
+                await RegisterCustomer(user);
+                await _userManager.AddToRoleAsync(user, Constants.Customer);
 
-            user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, user.PasswordHash);
-            await _userManager.CreateAsync(user);
-            await _userManager.AddToRoleAsync(user, (librarians.Count > 0 ? "Customer" : "Librarian"));
-            await _signInManager.SignInAsync(user,false);
+            }
+            else
+            {
+                var librarians = await _userManager.GetUsersInRoleAsync(Constants.Librarian);
+                await RegisterCustomer(user);
+                await _userManager.AddToRoleAsync(user, (librarians.Count > 0 ? Constants.Customer : Constants.Librarian));
+                await _signInManager.SignInAsync(user, false);
+                
+                if (IsLibrarian())
+                {
+                    user.IsApproved = true;
+                }
+            }
 
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost("Edit")]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Edit(User user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            if (!IsLibrarian())
+            {
+                user.IsApproved = false;
+            }
+
+            /*
+             TODO:
+               Editing
+             */
+
+            return IsLibrarian() ? RedirectToAction("UserManagement") : RedirectToAction("Index", "Home");
         }
 
         [HttpPost("Login")]
@@ -103,7 +151,7 @@ namespace WebLibrary.Controllers
                 return RedirectToAction("Index","Home");
             }
 
-            return View("LoginIndex");
+            return View("Login");
         }
 
         [HttpGet("Logout")]
@@ -112,6 +160,13 @@ namespace WebLibrary.Controllers
             await _signInManager.SignOutAsync();
 
             return RedirectToAction("Index", "Home");
+        }
+
+        private bool IsLibrarian() => _signInManager.Context.User.IsInRole(Constants.Librarian);
+        private async Task RegisterCustomer(User user)
+        {
+            user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, user.PasswordHash);
+            await _userManager.CreateAsync(user);
         }
 
         /*

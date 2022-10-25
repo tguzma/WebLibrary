@@ -39,5 +39,10 @@ namespace WebLibrary.Models
         [BsonElement("bookIds")]
         [JsonPropertyName("bookIds")]
         public List<string> BookIds { get; set; }
+
+        [Display(Name = "Banned")]
+        public bool IsBanned { get; set; }
+
+        public bool IsApproved{ get; set; }
     }
 }

@@ -4,7 +4,7 @@
     ViewData["Title"] = "ApproveAccountIndex";
 }
 
-<h1>Approve customer accounts</h1>
+<h1>Manage users</h1>
 
 <table class="table">
     <thead>
@@ -19,12 +19,13 @@
                 @Html.DisplayNameFor(model => model.PersonalIdentificationNumber)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.UserName)
+                @Html.DisplayNameFor(model => model.IsBanned)
             </th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+        @foreach (var item in Model)
+        {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.FirstName)
@@ -33,15 +34,28 @@
                 @Html.DisplayFor(modelItem => item.LastName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.PersonalIdentificationNumber)
-            </td>
-            <td>
                 @Html.DisplayFor(modelItem => item.UserName)
             </td>
             <td>
-                @Html.ActionLink("Approve", "Approve", "User", new { item.Id }, new { @class = "btn btn-primary" })
+                <div class="isBanned">@(@item.IsBanned)</div>
+            </td>
+            <td>
+                <a class="btn btn-primary editBtn" asp-controller="User" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+            </td>
+            <td>
+                <button id="@item.Id" class="btn @(item.IsBanned ? "btn-success" : "btn-danger") banBtn">Ban</button>
+            </td>
+            <td>
+                @if (!item.IsApproved)
+                {
+                    <button id="@item.Id" class="btn btn-secondary approveBtn">Approve</button>
+                }
             </td>
         </tr>
-}
+        }
     </tbody>
 </table>
+
+@section Scripts {
+    <script src="~/js/user.js"></script>
+}    

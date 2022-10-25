@@ -1,5 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using WebLibrary.Utils 
 @inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
 
 <!DOCTYPE html>
 <html lang="en">
@@ -25,10 +27,13 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         @{
-                            if (SignInManager.IsSignedIn(User))
+                            if (SignInManager.IsSignedIn(User) && SignInManager.Context.User.IsInRole(Constants.Librarian))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="ApproveAccounts">Approve accounts</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Register">Register customer</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="UserManagement">Manage users</a>
                                 </li>
                             }
                         }
@@ -39,7 +44,13 @@
                         if (SignInManager.IsSignedIn(User))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Logout">Logout</a>
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Edit">Account Settings</a>
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Logout">Logout</a>
+                                    </div>
+                                </div>
                             </li>
                         }
                         else
@@ -69,7 +80,6 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>
