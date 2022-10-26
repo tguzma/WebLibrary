@@ -60,7 +60,7 @@ namespace WebLibrary.Controllers
                 return View(customers);
             }
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Book");
         }
 
         [HttpPost("Approve")]
@@ -112,29 +112,35 @@ namespace WebLibrary.Controllers
                 }
             }
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Book");
         }
 
         [HttpPost("Edit")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(User user)
+        public async Task<ActionResult> Edit(Guid id, User user)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
 
+            var dbUser = await _userManager.FindByIdAsync(id.ToString());
+
             if (!IsLibrarian())
             {
-                user.IsApproved = false;
+                dbUser.IsApproved = false;
             }
 
-            /*
-             TODO:
-               Editing
-             */
+            dbUser.FirstName = user.FirstName;
+            dbUser.LastName = user.LastName;
+            dbUser.UserName = user.UserName;
+            dbUser.PasswordHash =_userManager.PasswordHasher.HashPassword(user, user.PasswordHash);
+            dbUser.PersonalIdentificationNumber = user.PersonalIdentificationNumber;
+            dbUser.Adress = user.Adress;
 
-            return IsLibrarian() ? RedirectToAction("UserManagement") : RedirectToAction("Index", "Home");
+            await _userManager.UpdateAsync(dbUser);
+
+            return RedirectToAction("Index", "Book");
         }
 
         [HttpPost("Login")]
@@ -148,7 +154,7 @@ namespace WebLibrary.Controllers
 
             if ((await _signInManager.PasswordSignInAsync(userName, passwordHash, false, false)).Succeeded)
             {
-                return RedirectToAction("Index","Home");
+                return RedirectToAction("Index", "Book");
             }
 
             return View("Login");
@@ -168,49 +174,5 @@ namespace WebLibrary.Controllers
             user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, user.PasswordHash);
             await _userManager.CreateAsync(user);
         }
-
-        /*
-        // GET: UserController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: UserController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: UserController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: UserController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-        */
     }
 }

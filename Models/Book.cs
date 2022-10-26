@@ -7,14 +7,13 @@ namespace WebLibrary.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
-        public string author { get; set; }
-        public string country { get; set; }
-        public string imageLink { get; set; }
-        public string language { get; set; }
-        public string link { get; set; }
-        public int pages { get; set; }
-        public string title { get; set; }
-        public int year { get; set; }
+        public string BookId { get; set; }
+        public string BookName { get; set; }
+        public string AuthorName { get; set; }
+        public int NumberOfPages { get; set; }
+        public int YearOfRelease { get; set; }
+        public string ImageUrl { get; set; }
+        public int AmountAvalible { get; set; }
+
     }
 }
