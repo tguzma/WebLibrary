@@ -22,7 +22,13 @@ namespace WebLibrary.Services
         public async Task<List<Book>> GetAsync()
         {
             return await _bookCollection.Find(new BsonDocument()).ToListAsync();
-        } 
+        }
+
+        public async Task<Book> FindByIdAsync(string id)
+        {
+            var filter = Builders<Book>.Filter.Eq("BookId", id);
+            return await _bookCollection.Find(filter).Limit(1).SingleAsync();
+        }
 
         public async Task CreateAsync(Book book) 
         {
@@ -31,17 +37,17 @@ namespace WebLibrary.Services
             return;
         }
 
-        public async Task UpdatetAsync(string id,UpdateDefinition<Book> updateDefinition)
+        public async Task UpdatetAsync(string id,Book book)
         {
-            FilterDefinition<Book> filter = Builders<Book>.Filter.Eq("Id", id);
-            await _bookCollection.UpdateOneAsync(filter, updateDefinition);
+            var filter = Builders<Book>.Filter.Eq("BookId", id);
+            await _bookCollection.ReplaceOneAsync(filter, book);
 
             return;
         }
 
         public async Task DeleteAsync(string id)
         {
-            FilterDefinition<Book> filter = Builders<Book>.Filter.Eq("Id", id);
+            var filter = Builders<Book>.Filter.Eq("BookId", id);
             await _bookCollection.DeleteOneAsync(filter);
 
             return;

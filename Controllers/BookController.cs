@@ -1,39 +1,35 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
 using WebLibrary.Models;
+using WebLibrary.Models.Dtos;
 using WebLibrary.Services;
+using WebLibrary.Utils;
 
 namespace WebLibrary.Controllers
 {
-    [Route("Store")] //TODO this controller + FE for created API methods
     public class BookController : Controller
     {
         private readonly MongoDBBookService _bookService;
+        private readonly IMapper _mapper;
 
-        public BookController(MongoDBBookService bookService)
+        public BookController(MongoDBBookService bookService, IMapper mapper)
         {
             _bookService = bookService;
+            _mapper = mapper;
         }
 
         [HttpGet("Index")]
-        public async Task<ActionResult> Index() => View(await _bookService.GetAsync());
-
-        [HttpGet("Details")]
-        public ActionResult Details(Guid id)
+        public async Task<ActionResult> Index()
         {
-            return View();
+            return View(_mapper.Map(await _bookService.GetAsync(), new List<BookDto>()));
         }
-
-        [HttpGet("Edit")]
-        public ActionResult Edit(Guid id)
-        {
-            return View();
-        }
-
 
         [HttpGet("Create")]
         public ActionResult Create()
@@ -41,38 +37,108 @@ namespace WebLibrary.Controllers
             return View();
         }
 
+        [HttpGet("Edit")]
+        public async Task<ActionResult> Edit(string id)
+        {
+            var book = await _bookService.FindByIdAsync(id);
+
+            return View(_mapper.Map(book,new BookDto()));
+        }    
+
+        [HttpGet("Detail")]
+        public async Task<ActionResult> Detail(string id)
+        {
+            var book = await _bookService.FindByIdAsync(id);
+
+            return View(_mapper.Map(book, new BookDto()));
+        }
+
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Book book)
+        public async Task<ActionResult> Create(BookDto bookDto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Error","Home");
             }
-            catch
-            {
-                return View();
-            }
+
+            var book = _mapper.Map(bookDto, new Book());
+            book.ImageUrl = await SaveImageAsync(bookDto.Image);
+
+            await _bookService.CreateAsync(book);
+
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost("Edit")]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Guid id, Book book)
+        public async Task<ActionResult> Edit(string bookId, BookDto bookDto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Error", "Home");
             }
-            catch
+
+            var book = await _bookService.FindByIdAsync(bookId);
+      
+            if (bookDto.Image != null)
             {
-                return View();
+                DeleteImage(book.ImageUrl);
+                book.ImageUrl = await SaveImageAsync(bookDto.Image);
             }
+
+            bookDto.ImageUrl = book.ImageUrl;
+            _mapper.Map(bookDto, book);
+
+            await _bookService.UpdatetAsync(bookId, book);
+
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost("Delete")]
-        public ActionResult Delete(Guid id)
+        public async Task<ActionResult> Delete(string bookId)
         {
-            return View();
+            /*add logic that denies deletion when any user has book*/
+            await _bookService.DeleteAsync(bookId);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        /* if needed in future for smth, can be just deleted tbh 
+        private FormFile GetImage(string imageUrl)
+        {
+            new FileExtensionContentTypeProvider().TryGetContentType(Path.GetFileName(imageUrl), out string contentType);
+
+            using (var stream = System.IO.File.OpenRead(Path.GetFullPath(imageUrl)))
+            {
+                return new FormFile(stream, 0, stream.Length, null, Path.GetFileName(imageUrl))
+                {
+                    Headers = new HeaderDictionary(),
+                    ContentType = contentType
+                };
+            }
+        }
+        */
+
+        private async Task<string> SaveImageAsync(IFormFile image)
+        {
+            var imageUrl = Path.Combine(Constants.FilePath, Guid.NewGuid() + Path.GetExtension(image.FileName));
+            using (var fileStream = new FileStream(Path.GetFullPath(imageUrl), FileMode.Create))
+            {
+                await image.CopyToAsync(fileStream);
+            }
+
+            return imageUrl;
+        }
+
+        private void DeleteImage(string path)
+        {
+            var fullPath = Path.GetFullPath(path);
+
+            if (System.IO.File.Exists(fullPath))
+            {
+                System.IO.File.Delete(fullPath);
+            }
         }
     }
 }

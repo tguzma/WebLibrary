@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebLibrary.Models;
+using WebLibrary.Models.Dtos;
 using WebLibrary.Services;
 using WebLibrary.Utils;
 
@@ -16,17 +19,20 @@ namespace WebLibrary.Controllers
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly MongoDBUserService _userService;
+        private readonly IMapper _mapper;
 
         public UserController
             (SignInManager<User> signInManager, 
             UserManager<User> userManager, 
             MongoDBUserService userService,
-            RoleManager<Role> roleManager)
+            RoleManager<Role> roleManager,
+            IMapper mapper)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _userService = userService;
             _roleManager = roleManager;
+            _mapper = mapper;
         }
 
         [HttpGet("Register")]
@@ -46,7 +52,7 @@ namespace WebLibrary.Controllers
         {
             var user = await (id.HasValue ?  _userManager.FindByIdAsync(id.ToString()) : _userManager.GetUserAsync(_signInManager.Context.User));
 
-            return View("AccountSettings", user);
+            return View("AccountSettings", _mapper.Map(user, new UserDto()));
         }
 
         [HttpGet("UserManagement")]
@@ -57,7 +63,7 @@ namespace WebLibrary.Controllers
                 var role = await _roleManager.FindByNameAsync(Constants.Customer);
                 var customers = await _userService.GetUsersByRoleAsync(role.Id);
 
-                return View(customers);
+                return View(_mapper.Map(customers, new List<UserDto>()));
             }
 
             return RedirectToAction("Index", "Book");
@@ -85,12 +91,14 @@ namespace WebLibrary.Controllers
 
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create(User user)
+        public async Task<ActionResult> Create(UserDto userDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
+
+            var user = _mapper.Map(userDto,new User());
 
             if (IsLibrarian())
             {
@@ -117,28 +125,25 @@ namespace WebLibrary.Controllers
 
         [HttpPost("Edit")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(Guid id, User user)
+        public async Task<ActionResult> Edit(Guid id, UserDto userDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
 
-            var dbUser = await _userManager.FindByIdAsync(id.ToString());
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            userDto.IsApproved = user.IsApproved;
+            userDto.IsBanned = user.IsBanned;
+
+            _mapper.Map(userDto, user);
 
             if (!IsLibrarian())
             {
-                dbUser.IsApproved = false;
+                user.IsApproved = false;
             }
 
-            dbUser.FirstName = user.FirstName;
-            dbUser.LastName = user.LastName;
-            dbUser.UserName = user.UserName;
-            dbUser.PasswordHash =_userManager.PasswordHasher.HashPassword(user, user.PasswordHash);
-            dbUser.PersonalIdentificationNumber = user.PersonalIdentificationNumber;
-            dbUser.Adress = user.Adress;
-
-            await _userManager.UpdateAsync(dbUser);
+            await _userManager.UpdateAsync(user);
 
             return RedirectToAction("Index", "Book");
         }

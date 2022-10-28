@@ -9,5 +9,6 @@ namespace WebLibrary.Utils
     {
         public const string Librarian = "Librarian";
         public const string Customer = "Customer";
+        public const string FilePath = "wwwroot\\img\\";
     }
 }

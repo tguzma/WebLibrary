@@ -38,6 +38,7 @@ namespace WebLibrary
                 mongoDbSettings.ConnectionString, mongoDbSettings.DatabaseName
             );
 
+            services.AddAutoMapper(typeof(Startup));
             services.AddSingleton<MongoDBBookService>();
             services.AddSingleton<MongoDBUserService>();
         }
