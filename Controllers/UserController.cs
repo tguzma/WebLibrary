@@ -135,8 +135,8 @@ namespace WebLibrary.Controllers
             var user = await _userManager.FindByIdAsync(id.ToString());
             userDto.IsApproved = user.IsApproved;
             userDto.IsBanned = user.IsBanned;
-
             _mapper.Map(userDto, user);
+            user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, user.PasswordHash);
 
             if (!IsLibrarian())
             {
