@@ -28,7 +28,7 @@ namespace WebLibrary.Models
 
         [BsonElement("bookIds")]
         [JsonPropertyName("bookIds")]
-        public List<string> BookIds { get; set; }
+        public List<string> BookIds { get; set; } = new List<string>();
         public bool IsBanned { get; set; }
         public bool IsApproved{ get; set; }
     }

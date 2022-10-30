@@ -37,9 +37,9 @@ namespace WebLibrary.Services
             return;
         }
 
-        public async Task UpdatetAsync(string id,Book book)
+        public async Task UpdatetAsync(Book book)
         {
-            var filter = Builders<Book>.Filter.Eq("BookId", id);
+            var filter = Builders<Book>.Filter.Eq("BookId", book.BookId);
             await _bookCollection.ReplaceOneAsync(filter, book);
 
             return;

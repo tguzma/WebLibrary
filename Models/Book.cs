@@ -27,5 +27,6 @@ namespace WebLibrary.Models
 
         [Display(Name = "Amount avalible")]
         public int AmountAvalible { get; set; }
+        public int AmountBorrowed { get; set; } = 0;
     }
 }
