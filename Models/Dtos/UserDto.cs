@@ -26,5 +26,6 @@ namespace WebLibrary.Models.Dtos
         public List<string> BookIds { get; set; }
         public bool IsBanned { get; set; }
         public bool IsApproved { get; set; }
+        public List<HistoryEntry> BookHistory { get; set; } = new List<HistoryEntry>();
     }
 }

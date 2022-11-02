@@ -26,14 +26,21 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         @{
-                            if (SignInManager.IsSignedIn(User) && SignInManager.Context.User.IsInRole(Constants.Librarian))
+                            if (SignInManager.IsSignedIn(User))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Register">Register customer</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Book" asp-action="History">History</a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="UserManagement">Manage users</a>
-                                </li>
+
+                                if (SignInManager.Context.User.IsInRole(Constants.Librarian))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Register">Register customer</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="UserManagement">Manage users</a>
+                                    </li>
+                                }
                             }
                         }
                     </ul>

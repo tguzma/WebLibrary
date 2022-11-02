@@ -1,0 +1,51 @@
+﻿@using WebLibrary.Models.Dtos;
+@model Tuple<UserDto,List<BookDto>>
+@{
+    ViewData["Title"] = "View";
+}
+
+<h1>History</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Book Name
+            </th>
+            <th>
+                Date borrowed
+            </th>
+            <th>
+                Date returned
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @{ 
+            var historyEntries = Model.Item1.BookHistory;
+            historyEntries = historyEntries.OrderBy(x => x.DateReturned).ToList();
+
+            foreach (var item in historyEntries)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => Model.Item2.FirstOrDefault(x => x.BookId == item.BookId).BookName)
+                    </td>                
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DateBorrowed)
+                    </td>                
+                    <td>
+                        @if (item.DateReturned.HasValue)
+                        {
+                            @Html.DisplayFor(modelItem => item.DateReturned)
+                        }
+                        else
+                        {
+                            <text>Not Returned yet</text>
+                        }
+                        </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

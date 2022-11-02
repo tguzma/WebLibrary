@@ -21,6 +21,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.IsBanned)
             </th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -38,6 +39,9 @@
             </td>
             <td>
                 <div class="isBanned">@(@item.IsBanned)</div>
+            </td>
+            <td>
+                <a class="btn btn-outline-primary historyBtn" asp-controller="Book" asp-action="History" asp-route-id="@item.Id">History</a>
             </td>
             <td>
                 <a class="btn btn-primary editBtn" asp-controller="User" asp-action="Edit" asp-route-id="@item.Id">Edit</a>

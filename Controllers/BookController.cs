@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using WebLibrary.Models;
 using WebLibrary.Models.Dtos;
@@ -57,6 +58,18 @@ namespace WebLibrary.Controllers
 
             return View(_mapper.Map(book, new BookDto()));
         }
+
+        [HttpGet("History")]
+        public async Task<ActionResult> History(string id)
+        {
+            var user = string.IsNullOrEmpty(id) ? await _userManager.GetUserAsync(_signInManager.Context.User) : await _userManager.FindByIdAsync(id);
+            var books = await _bookService.GetAsync();
+
+            var tuple = new Tuple<UserDto, List<BookDto>>(_mapper.Map(user, new UserDto()), _mapper.Map(books,new List<BookDto>()));
+            
+            return View(tuple);
+        }
+
 
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
@@ -125,6 +138,7 @@ namespace WebLibrary.Controllers
             }
 
             user.BookIds.Add(bookId);
+            user.BookHistory.Add(new HistoryEntry(bookId, DateTime.Now, null));
 
             book.AmountAvalible--;
             book.AmountBorrowed++;
@@ -147,6 +161,7 @@ namespace WebLibrary.Controllers
             }
 
             user.BookIds.Remove(bookId);
+            user.BookHistory.FirstOrDefault(x => x.BookId == bookId && !x.DateReturned.HasValue).DateReturned = DateTime.Now;
 
             book.AmountAvalible++;
             book.AmountBorrowed--;
@@ -156,23 +171,6 @@ namespace WebLibrary.Controllers
 
             return Json(book.AmountAvalible);
         }
-
-        /* if needed in future for smth, can be just deleted tbh 
-        private FormFile GetImage(string imageUrl)
-        {
-            new FileExtensionContentTypeProvider().TryGetContentType(Path.GetFileName(imageUrl), out string contentType);
-
-            using (var stream = System.IO.File.OpenRead(Path.GetFullPath(imageUrl)))
-            {
-                return new FormFile(stream, 0, stream.Length, null, Path.GetFileName(imageUrl))
-                {
-                    Headers = new HeaderDictionary(),
-                    ContentType = contentType
-                };
-            }
-        }
-        */
-
         private async Task<string> SaveImageAsync(IFormFile image)
         {
             var imageUrl = Path.Combine(Constants.FilePath, Guid.NewGuid() + Path.GetExtension(image.FileName));

@@ -8,16 +8,6 @@ using System.Text.Json.Serialization;
 
 namespace WebLibrary.Models
 {
-    /*
-        Aplikace uchovává/spravuje seznam zákazníků. 
-        U zákazníka uchováváme/spravujeme jméno, příjmení, rodné číslo, adresu, uživatelské jméno a heslo. 
-        Na konkrétní účet se pak navazují vypůjčené knihy. 
-        Zákaznický účet může vytvářet knihovník nebo sám uživatel. 
-        V případě že si ho vytvoří sám uživatel,
-        vidí  knihovník upozornění a knihovník musí tento účet schválit před tím než je funkční a umožňuje výpůjčku knih.
-        Pokud je účet schválen, může si zákazník půjčovat knihy nebo editovat své vlastní záznamy. 
-        Pokud však dojde k editaci záznamů, je učet opět omezen do schválení knihovníka.
-     */
     public class User : MongoIdentityUser<Guid>
     {
         public string FirstName { get; set; }
@@ -31,5 +21,6 @@ namespace WebLibrary.Models
         public List<string> BookIds { get; set; } = new List<string>();
         public bool IsBanned { get; set; }
         public bool IsApproved{ get; set; }
+        public List<HistoryEntry> BookHistory { get; set; } = new List<HistoryEntry>();
     }
 }
