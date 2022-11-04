@@ -62,7 +62,7 @@ namespace WebLibrary.Controllers
         [HttpGet("History")]
         public async Task<ActionResult> History(string id)
         {
-            var user = string.IsNullOrEmpty(id) ? await _userManager.GetUserAsync(_signInManager.Context.User) : await _userManager.FindByIdAsync(id);
+            var user = GetUserAsync(id);
             var books = await _bookService.GetAsync();
 
             var tuple = new Tuple<UserDto, List<BookDto>>(_mapper.Map(user, new UserDto()), _mapper.Map(books,new List<BookDto>()));
@@ -127,10 +127,10 @@ namespace WebLibrary.Controllers
         }
         
         [HttpPost("Borrow")]
-        public async Task<ActionResult> Borrow(string bookId)
+        public async Task<ActionResult> Borrow(string bookId, Guid? userId)
         {
             var book = await _bookService.FindByIdAsync(bookId);
-            var user = await _userManager.GetUserAsync(_signInManager.Context.User);
+            var user = await GetUserAsync(userId.ToString());
 
             if (book.AmountAvalible <= 0 || user.BookIds.Contains(bookId) || user.BookIds.Count >= 6)
             {
@@ -150,10 +150,10 @@ namespace WebLibrary.Controllers
         }
 
         [HttpPost("Return")]
-        public async Task<ActionResult> Return(string bookId)
+        public async Task<ActionResult> Return(string bookId, Guid? userId)
         {
             var book = await _bookService.FindByIdAsync(bookId);
-            var user = await _userManager.GetUserAsync(_signInManager.Context.User);
+            var user = await GetUserAsync(userId.ToString());
 
             if (!user.BookIds.Contains(bookId))
             {
@@ -171,6 +171,7 @@ namespace WebLibrary.Controllers
 
             return Json(book.AmountAvalible);
         }
+
         private async Task<string> SaveImageAsync(IFormFile image)
         {
             var imageUrl = Path.Combine(Constants.FilePath, Guid.NewGuid() + Path.GetExtension(image.FileName));
@@ -191,5 +192,7 @@ namespace WebLibrary.Controllers
                 System.IO.File.Delete(fullPath);
             }
         }
+
+        private async Task<User> GetUserAsync(string id) => string.IsNullOrEmpty(id) ? await _userManager.GetUserAsync(_signInManager.Context.User) : await _userManager.FindByIdAsync(id);
     }
 }

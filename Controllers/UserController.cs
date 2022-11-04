@@ -52,6 +52,11 @@ namespace WebLibrary.Controllers
         {
             var user = await (id.HasValue ?  _userManager.FindByIdAsync(id.ToString()) : _userManager.GetUserAsync(_signInManager.Context.User));
 
+            if (!user.IsApproved && !IsLibrarian())
+            {
+                return RedirectToAction("Index", "Book");
+            }
+
             return View("AccountSettings", _mapper.Map(user, new UserDto()));
         }
 
