@@ -62,7 +62,7 @@ namespace WebLibrary.Controllers
         [HttpGet("History")]
         public async Task<ActionResult> History(string id)
         {
-            var user = GetUserAsync(id);
+            var user = await GetUserAsync(id);
             var books = await _bookService.GetAsync();
 
             var tuple = new Tuple<UserDto, List<BookDto>>(_mapper.Map(user, new UserDto()), _mapper.Map(books,new List<BookDto>()));
