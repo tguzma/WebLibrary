@@ -20,6 +20,7 @@ namespace WebLibrary.Models.Dtos
         public string PersonalIdentificationNumber { get; set; }
         [Required]
         public string Adress { get; set; }
+
         [Required]
         [RegularExpression(@"^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{4,25}$", ErrorMessage = "Password must be at least 4 char long and must include at least one upper case letter, one lower case letter, and one numeric digit.")]
         public string PasswordHash { get; set; }
