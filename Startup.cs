@@ -1,3 +1,4 @@
+using AspNetCore.Identity.Mongo;
 using AspNetCore.Identity.MongoDbCore.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,18 +32,21 @@ namespace WebLibrary
 
             services.AddControllersWithViews();
 
+
             var mongoDbSettings = Configuration.GetSection("MongoDB").Get<MongoDBSettings>();
             services.Configure<MongoDBSettings>(Configuration.GetSection("MongoDB"));
 
             services.AddIdentity<User, Role>()
             .AddMongoDbStores<User, Role, Guid>
             (
-                mongoDbSettings.ConnectionString, mongoDbSettings.DatabaseName
+                 mongoDbSettings.ConnectionString, mongoDbSettings.DatabaseName
+               // "mongodb+srv://user0:rootroot@<cluster-address>/test?w=majority", "LibraryDB"
             );
 
             services.AddAutoMapper(typeof(Startup));
             services.AddSingleton<MongoDBBookService>();
             services.AddSingleton<MongoDBUserService>();
+            services.AddSingleton<MongoDBLoanService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
