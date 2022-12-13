@@ -13,11 +13,13 @@ $(document).on('click', '.borrowBtn', function () {
         type: "POST",
         data: { bookId: card.attr("id") },
         success: function (printsLeft) {
-            btn.addClass('returnBtn').removeClass('borrowBtn')
-            btn.text('Return');
-            card.find(".printsLeft").text(`Prints left: ${printsLeft}`);
-            count--;
-            changeCountText();
+
+                btn.addClass('returnBtn').removeClass('borrowBtn')
+                btn.text('Return');
+                card.find(".printsLeft").text(`Prints left: ${printsLeft}`);
+                count--;
+                changeCountText();
+
         }
     });
 });

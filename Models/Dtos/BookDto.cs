@@ -9,6 +9,7 @@ namespace WebLibrary.Models.Dtos
 {
     public class BookDto
     {
+
         public string BookId { get; set; }
         [Required]
         public string BookName { get; set; }
@@ -24,5 +25,8 @@ namespace WebLibrary.Models.Dtos
         [Required]
         [RegularExpression(@"^[0-9]+$", ErrorMessage = "Amount shall be an integer")]
         public int AmountAvalible { get; set; }
+
+        //does it need amount borrowed?
+        public int AmountBorrowed { get; set; }
     }
 }

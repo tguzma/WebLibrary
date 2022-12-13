@@ -4,15 +4,20 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using MongoDB.Driver;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Threading.Tasks;
 using WebLibrary.Models;
 using WebLibrary.Models.Dtos;
 using WebLibrary.Services;
 using WebLibrary.Utils;
+using static System.Net.WebRequestMethods;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace WebLibrary.Controllers
 {
@@ -22,13 +27,19 @@ namespace WebLibrary.Controllers
         private readonly IMapper _mapper;
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
+        private readonly MongoDBLoanService _loanService;
 
-        public BookController(MongoDBBookService bookService, IMapper mapper, SignInManager<User> signInManager, UserManager<User> userManager)
+        public BookController(MongoDBBookService bookService, IMapper mapper,
+            SignInManager<User> signInManager, UserManager<User> userManager,
+            MongoDBLoanService loanService
+            )
         {
             _bookService = bookService;
             _mapper = mapper;
             _signInManager = signInManager;
             _userManager = userManager;
+            _loanService = loanService;
+
         }
 
         [HttpGet("Index")]
@@ -68,6 +79,12 @@ namespace WebLibrary.Controllers
             var tuple = new Tuple<UserDto, List<BookDto>>(_mapper.Map(user, new UserDto()), _mapper.Map(books,new List<BookDto>()));
             
             return View(tuple);
+        }
+         
+        [HttpGet("BorrowedBooks")]
+        public async Task<ActionResult> BorrowedBooks(string id)
+        {
+            return View(_mapper.Map(await _bookService.GetAsync(), new List<BookDto>()));
         }
 
 
@@ -131,10 +148,11 @@ namespace WebLibrary.Controllers
         {
             var book = await _bookService.FindByIdAsync(bookId);
             var user = await GetUserAsync(userId.ToString());
+            
 
             if (book.AmountAvalible <= 0 || user.BookIds.Contains(bookId) || user.BookIds.Count >= 6)
             {
-                return Ok(); // this needs to send warning message "Book cannot be borrowed"
+                return base.Content("Warning book cannot be borrowed"); // this needs to send warning message "Book cannot be borrowed"
             }
 
             user.BookIds.Add(bookId);
@@ -142,6 +160,14 @@ namespace WebLibrary.Controllers
 
             book.AmountAvalible--;
             book.AmountBorrowed++;
+
+            var loan = new Loan();
+
+            loan.BookId = bookId;
+            loan.UserId = "{"+ user.Id.ToString()+"}";
+            loan.CreatedAt = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd"));
+            await _loanService.CreateAsync(loan);
+            //add records to loan collection
 
             await _bookService.UpdatetAsync(book);
             await _userManager.UpdateAsync(user);
@@ -154,6 +180,7 @@ namespace WebLibrary.Controllers
         {
             var book = await _bookService.FindByIdAsync(bookId);
             var user = await GetUserAsync(userId.ToString());
+            await _loanService.DeleteAsync(bookId, user.Id.ToString());
 
             if (!user.BookIds.Contains(bookId))
             {
@@ -162,9 +189,9 @@ namespace WebLibrary.Controllers
 
             user.BookIds.Remove(bookId);
             user.BookHistory.FirstOrDefault(x => x.BookId == bookId && !x.DateReturned.HasValue).DateReturned = DateTime.Now;
-
             book.AmountAvalible++;
             book.AmountBorrowed--;
+
 
             await _bookService.UpdatetAsync(book);
             await _userManager.UpdateAsync(user);

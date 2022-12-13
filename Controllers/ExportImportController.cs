@@ -16,12 +16,15 @@ namespace WebLibrary.Controllers
     {
         private readonly MongoDBBookService _dbService;
         private readonly SignInManager<User> _signInManager;
+        private readonly MongoDBLoanService _dbLService;
 
 
-        public ExportImportController(MongoDBBookService dbService, SignInManager<User> signInManager)
+        public ExportImportController(MongoDBBookService dbService,
+            SignInManager<User> signInManager, MongoDBLoanService dbLService)
         {
             _dbService = dbService;
             _signInManager = signInManager;
+            _dbLService = dbLService;
 
         }
 
