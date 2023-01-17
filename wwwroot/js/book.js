@@ -41,6 +41,32 @@ $(document).on('click', '.returnBtn', function () {
     });
 });
 
+$(document).on('click', '.borrowOrReturnBtn', function () {
+    let bookId = $(this).parent().attr("id");
+    let username = $(".userNameInput").val();
+
+    $.ajax({
+        url: "/BorrowOrReturn",
+        type: "POST",
+        data: {
+            bookId: bookId,
+            username: username
+        },
+        success: function (response) {
+            if (response.error) {
+                alert("Book cannot be borrowed");
+                return;
+            }
+            $(".amt-avalib").next().text(response.amountAvalible);
+            if (response.wasBorrowed) {
+                alert("The book was returned.");
+            } else {
+                alert("The book was borrowed.");
+            }
+        }
+    });
+});
+
 function changeCountText() {
     canBeBorrowed.text(`You can borrow ${count} more books.`);
 }

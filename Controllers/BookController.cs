@@ -152,7 +152,7 @@ namespace WebLibrary.Controllers
 
             if (book.AmountAvalible <= 0 || user.BookIds.Contains(bookId) || user.BookIds.Count >= 6)
             {
-                return base.Content("Warning book cannot be borrowed"); // this needs to send warning message "Book cannot be borrowed"
+                return base.Content("Book cannot be borrowed"); 
             }
 
             user.BookIds.Add(bookId);
@@ -164,10 +164,9 @@ namespace WebLibrary.Controllers
             var loan = new Loan();
 
             loan.BookId = bookId;
-            loan.UserId = "{"+ user.Id.ToString()+"}";
+            loan.UserId = user.Id.ToString();
             loan.CreatedAt = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd"));
             await _loanService.CreateAsync(loan);
-            //add records to loan collection
 
             await _bookService.UpdatetAsync(book);
             await _userManager.UpdateAsync(user);
@@ -180,13 +179,13 @@ namespace WebLibrary.Controllers
         {
             var book = await _bookService.FindByIdAsync(bookId);
             var user = await GetUserAsync(userId.ToString());
-            await _loanService.DeleteAsync(bookId, user.Id.ToString());
 
             if (!user.BookIds.Contains(bookId))
             {
-                return Ok(); // this needs to send warning message "Book cannot be returned"
+                return base.Content("Book cannot be borrowed");
             }
 
+            await _loanService.DeleteAsync(bookId, user.Id.ToString());
             user.BookIds.Remove(bookId);
             user.BookHistory.FirstOrDefault(x => x.BookId == bookId && !x.DateReturned.HasValue).DateReturned = DateTime.Now;
             book.AmountAvalible++;
@@ -197,6 +196,53 @@ namespace WebLibrary.Controllers
             await _userManager.UpdateAsync(user);
 
             return Json(book.AmountAvalible);
+        }
+
+        [HttpPost("BorrowOrReturn")]
+        public async Task<ActionResult> BorrowOrReturn(string bookId, string username)
+        {
+            var book = await _bookService.FindByIdAsync(bookId);
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                return base.Content("Book cannot be returned");
+            }
+
+            var loan = await _loanService.FindByIdAsync(bookId,user.Id.ToString());
+            var wasBorrowed = !(loan.LoanId == null);
+
+            if (wasBorrowed) //return
+            {
+                await _loanService.DeleteAsync(bookId, user.Id.ToString());
+                user.BookIds.Remove(bookId);
+                user.BookHistory.FirstOrDefault(x => x.BookId == bookId && !x.DateReturned.HasValue).DateReturned = DateTime.Now;
+                book.AmountAvalible++;
+                book.AmountBorrowed--;
+            }
+            else //borrow
+            {
+                if (book.AmountAvalible <= 0 || user.BookIds.Count >= 6)
+                {
+                    return Json(new { error = true});
+                }
+
+                user.BookIds.Add(bookId);
+                user.BookHistory.Add(new HistoryEntry(bookId, DateTime.Now, null));
+
+                book.AmountAvalible--;
+                book.AmountBorrowed++;
+
+                loan.BookId = bookId;
+                loan.UserId = user.Id.ToString();
+                loan.CreatedAt = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd"));
+                await _loanService.CreateAsync(loan);
+            }
+
+            await _bookService.UpdatetAsync(book);
+            await _userManager.UpdateAsync(user);
+
+            return Json(new {book.AmountAvalible, wasBorrowed });
         }
 
         private async Task<string> SaveImageAsync(IFormFile image)

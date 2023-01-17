@@ -25,9 +25,15 @@ namespace WebLibrary.Services
 
         public async Task<Loan> FindByIdAsync(string idBook, string idUser)
         {
-            var filter = Builders<Loan>.Filter.Eq("BookId", idBook);
-            filter &= (Builders<Loan>.Filter.Eq("BookId", idBook) | Builders<Loan>.Filter.Eq("UserId",idUser));
-            return await _loanCollection.Find(filter).Limit(1).SingleAsync();
+            var filters = Builders<Loan>.Filter.And(Builders<Loan>.Filter.Eq("BookId", idBook),Builders<Loan>.Filter.Eq("UserId",idUser));
+            try
+            {
+                return await _loanCollection.Find(filters).Limit(1).SingleAsync();
+            }
+            catch
+            {
+                return new Loan();
+            }
         }
 
         public async Task CreateAsync(Loan loan)
