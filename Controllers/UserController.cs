@@ -153,6 +153,40 @@ namespace WebLibrary.Controllers
             return RedirectToAction("Index", "Book");
         }
 
+        [HttpGet("Search")]
+        public async Task<ActionResult> Search(string term)
+        {
+            if (string.IsNullOrEmpty(term))
+            {
+                return RedirectToAction(nameof(UserManagement));
+            }
+
+            var result = await _userService.Search(term);
+
+            return View("UserManagement", _mapper.Map(result, new List<UserDto>()));
+        }
+
+        [HttpGet("Autocomplete")]
+        public async Task<ActionResult> Autocomplete()
+        {
+            var tags = await _userService.Autocomplete();
+
+            return Json(new { tags });
+        }
+
+        [HttpGet("Sort")]
+        public async Task<ActionResult> Sort(string sortType)
+        {
+            if (string.IsNullOrEmpty(sortType))
+            {
+                return RedirectToAction(nameof(UserManagement));
+            }
+
+            var result = await _userService.Sort(sortType);
+
+            return View("UserManagement", _mapper.Map(result, new List<UserDto>()));
+        }
+
         [HttpPost("Login")]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Login(string userName, string passwordHash)

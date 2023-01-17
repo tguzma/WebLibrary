@@ -19,7 +19,7 @@ namespace WebLibrary.Models.Dtos
         [RegularExpression(@"^[0-9]+$", ErrorMessage ="Number of pages should be integer number")]
         public int NumberOfPages { get; set; }
         [Required]
-        public int YearOfRelease { get; set; }
+        public string YearOfRelease { get; set; }
         public IFormFile Image { get; set; }
         public string ImageUrl { get; set; }
         [Required]

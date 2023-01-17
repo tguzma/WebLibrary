@@ -245,6 +245,40 @@ namespace WebLibrary.Controllers
             return Json(new {book.AmountAvalible, wasBorrowed });
         }
 
+        [HttpGet("Search")]
+        public async Task<ActionResult> Search(string term)
+        {
+            if (string.IsNullOrEmpty(term))
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            var result = await _bookService.Search(term);
+
+            return View("Index", _mapper.Map(result, new List<BookDto>()));
+        }
+
+        [HttpGet("Autocomplete")]
+        public async Task<ActionResult> Autocomplete()
+        {
+            var tags = await _bookService.Autocomplete();
+
+            return Json(new { tags });
+        }
+
+        [HttpGet("Sort")]
+        public async Task<ActionResult> Sort(string sortType)
+        {
+            if (string.IsNullOrEmpty(sortType))
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            var result = await _bookService.Sort(sortType);
+
+            return View("Index", _mapper.Map(result, new List<BookDto>()));
+        }
+
         private async Task<string> SaveImageAsync(IFormFile image)
         {
             var imageUrl = Path.Combine(Constants.FilePath, Guid.NewGuid() + Path.GetExtension(image.FileName));

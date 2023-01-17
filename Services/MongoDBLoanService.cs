@@ -53,9 +53,8 @@ namespace WebLibrary.Services
 
         public async Task DeleteAsync(string idBook, string idUser)
         {
-            var filter = Builders<Loan>.Filter.Eq("BookId", idBook);
-            filter &= (Builders<Loan>.Filter.Eq("BookId", idBook) | Builders<Loan>.Filter.Eq("UserId", idUser));
-            await _loanCollection.DeleteOneAsync(filter);
+            var filters = Builders<Loan>.Filter.And(Builders<Loan>.Filter.Eq("BookId", idBook), Builders<Loan>.Filter.Eq("UserId", idUser));
+            await _loanCollection.DeleteOneAsync(filters);
 
             return;
         }

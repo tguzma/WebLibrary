@@ -12,7 +12,6 @@ namespace WebLibrary.Models
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-
         public string PersonalIdentificationNumber { get; set; }
         public string Adress { get; set; }
 

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using MongoDB.Bson;
+using MongoDB.Labs.Search;
 
 namespace WebLibrary.Services
 {
@@ -51,6 +52,46 @@ namespace WebLibrary.Services
             await _bookCollection.DeleteOneAsync(filter);
 
             return;
+        }
+
+        public async Task<List<Book>> Search(string term)
+        {
+            var filters = Builders<Book>.Filter.Where(x => x.BookName.Contains(term)) |
+                Builders<Book>.Filter.Where(x => x.AuthorName.Contains(term)) |
+                Builders<Book>.Filter.Where(x => x.YearOfRelease.Contains(term));
+
+            return await _bookCollection.Find(filters).ToListAsync(); 
+        }
+
+        public async Task<List<string>> Autocomplete()
+        {
+            var books = await _bookCollection.Find(new BsonDocument()).ToListAsync(); 
+            var tags = new List<string>();
+
+            foreach (var book in books)
+            {
+                if (!tags.Contains(book.BookName))
+                {
+                    tags.Add(book.BookName);
+                }
+                if (!tags.Contains(book.AuthorName))
+                {
+                    tags.Add(book.AuthorName);
+                }
+                if (!tags.Contains(book.YearOfRelease))
+                {
+                    tags.Add(book.YearOfRelease);
+                }
+            }
+
+            return tags;
+        }
+
+        public async Task<List<Book>> Sort(string sortType)
+        {
+            var filter = Builders<Book>.Sort.Ascending(sortType);
+
+            return await _bookCollection.Find(new BsonDocument()).Sort(filter).ToListAsync();
         }
     }
 }

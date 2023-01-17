@@ -3,48 +3,69 @@
 @model IEnumerable<WebLibrary.Models.Dtos.BookDto>
 @inject UserManager<User> UserManager
 @inject SignInManager<User> SignInManager
-
-@{
-    ViewData["Title"] = "Index";
-    var user = await UserManager.FindByIdAsync(UserManager.GetUserId(User));
-}
-
-<h1>Book store</h1>
-@{
-    if (SignInManager.Context.User.IsInRole(Constants.Librarian))
-    {
-        <a class="btn btn-primary" asp-area="" asp-controller="Book" asp-action="Create">Add new book</a> }
-    else{
-        <h2 class="canBeBorrowed" data-count="@(6 - user.BookIds.Count)"></h2>
-    }
-}
-
-<div class="row">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
     @{
-        foreach (var book in Model)
+        ViewData["Title"] = "Index";
+        var user = await UserManager.FindByIdAsync(UserManager.GetUserId(User));
+    }
+
+    <h1>Book store</h1>
+    @{
+        if (SignInManager.Context.User.IsInRole(Constants.Librarian))
         {
-
-            var isBorrowed = user.BookIds.Contains(book.BookId);
-
-            <div class="col-sm-4">
-                <div class="card">
-                    <img src="@(book.ImageUrl.Substring(7))" class="card-img-top bookImg">
-                    <div class="card-body" id="@book.BookId">
-                        <h5 class="card-title">@book.BookName</h5>
-                        <p class="card-text">By @book.AuthorName</p>
-                        <p class="card-text printsLeft">Prints left: @book.AmountAvalible</p>
-                        <a class="btn btn-primary" asp-area="" asp-controller="Book" asp-action="Detail" asp-route-id="@book.BookId">Book details</a>
-                        @if (user.IsApproved)
-                        {
-                            <button class="btn btn-secondary @(isBorrowed ? "returnBtn" : "borrowBtn")">@(isBorrowed ? "Return" : "Borrow")</button>
-                        }
-                    </div>
-                </div>
-            </div>
+            <a class="btn btn-primary" asp-area="" asp-controller="Book" asp-action="Create">Add new book</a> }
+        else
+        {
+            <h2 class="canBeBorrowed" data-count="@(6 - user.BookIds.Count)"></h2>
         }
     }
-</div>
 
-@section Scripts {
-    <script src="~/js/book.js"></script>
-}    
+    <form class="searchForm" asp-controller="Book" asp-action="Search" method="get" role="form">
+        <div class="input-group mb-3">
+            <input name="term" type="text" class="form-control searchInput" placeholder="Book's title, author or year of book's release">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary searchBtn" type="submit">Search</button>
+            </div>
+        </div>
+    </form>
+    <div class="dropdown">
+        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Filter by
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="btn btn-primary dropdown-item" asp-area="" asp-controller="Book" asp-action="Sort" asp-route-sortType="BookName">Book's title</a>
+            <a class="btn btn-primary dropdown-item" asp-area="" asp-controller="Book" asp-action="Sort" asp-route-sortType="AuthorName">Author</a>
+            <a class="btn btn-primary dropdown-item" asp-area="" asp-controller="Book" asp-action="Sort" asp-route-sortType="YearOfRelease">Year of book's release</a>
+        </div>
+    </div>
+
+    <div class="row">
+        @{
+            foreach (var book in Model)
+            {
+
+                var isBorrowed = user.BookIds.Contains(book.BookId);
+
+                <div class="col-sm-4">
+                    <div class="card">
+                        <img src="@(book.ImageUrl.Substring(7))" class="card-img-top bookImg">
+                        <div class="card-body" id="@book.BookId">
+                            <h5 class="card-title">@book.BookName</h5>
+                            <p class="card-text">By @book.AuthorName</p>
+                            <p class="card-text printsLeft">Prints left: @book.AmountAvalible</p>
+                            <a class="btn btn-primary" asp-area="" asp-controller="Book" asp-action="Detail" asp-route-id="@book.BookId">Book details</a>
+                            @if (user.IsApproved)
+                            {
+                                <button class="btn btn-secondary @(isBorrowed ? "returnBtn" : "borrowBtn")">@(isBorrowed ? "Return" : "Borrow")</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    @section Scripts {
+        <script src="~/js/book.js"></script>
+    }    

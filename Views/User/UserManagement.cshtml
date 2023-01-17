@@ -3,8 +3,30 @@
 @{
     ViewData["Title"] = "ApproveAccountIndex";
 }
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="/resources/demos/style.css">
 
 <h1>Manage users</h1>
+
+<form class="searchForm" asp-controller="User" asp-action="Search" method="get" role="form">
+    <div class="input-group mb-3">
+        <input name="term" type="text" class="form-control searchInput" placeholder="Search by first or last name, personal ID or adress">
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary searchBtn" type="submit">Search</button>
+        </div>
+    </div>
+</form>
+<div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Filter by
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="btn btn-primary dropdown-item" asp-area="" asp-controller="User" asp-action="Sort" asp-route-sortType="FirstName">First name</a>
+        <a class="btn btn-primary dropdown-item" asp-area="" asp-controller="User" asp-action="Sort" asp-route-sortType="LastName">Last name</a>
+        <a class="btn btn-primary dropdown-item" asp-area="" asp-controller="User" asp-action="Sort" asp-route-sortType="PersonalIdentificationNumber">Personal ID</a>
+        <a class="btn btn-primary dropdown-item" asp-area="" asp-controller="User" asp-action="Sort" asp-route-sortType="Adress">Adress</a>
+    </div>
+</div>
 
 <table class="table">
     <thead>
@@ -16,7 +38,13 @@
                 @Html.DisplayNameFor(model => model.LastName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PersonalIdentificationNumber)
+                @Html.DisplayNameFor(model => model.UserName)
+            </th>
+            <th>
+                Personal ID
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Adress)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.IsBanned)
@@ -27,35 +55,41 @@
     <tbody>
         @foreach (var item in Model)
         {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UserName)
-            </td>
-            <td>
-                <div class="isBanned">@(@item.IsBanned)</div>
-            </td>
-            <td>
-                <a class="btn btn-outline-primary historyBtn" asp-controller="Book" asp-action="History" asp-route-id="@item.Id">History</a>
-            </td>
-            <td>
-                <a class="btn btn-primary editBtn" asp-controller="User" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-            </td>
-            <td>
-                <button id="@item.Id" class="btn @(item.IsBanned ? "btn-success" : "btn-danger") banBtn">Ban</button>
-            </td>
-            <td>
-                @if (!item.IsApproved)
-                {
-                    <button id="@item.Id" class="btn btn-secondary approveBtn">Approve</button>
-                }
-            </td>
-        </tr>
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FirstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PersonalIdentificationNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Adress)
+                </td>
+                <td>
+                    <div class="isBanned">@(@item.IsBanned)</div>
+                </td>
+                <td>
+                    <a class="btn btn-outline-primary historyBtn" asp-controller="Book" asp-action="History" asp-route-id="@item.Id">History</a>
+                </td>
+                <td>
+                    <a class="btn btn-primary editBtn" asp-controller="User" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                </td>
+                <td>
+                    <button id="@item.Id" class="btn @(item.IsBanned ? "btn-success" : "btn-danger") banBtn">Ban</button>
+                </td>
+                <td>
+                    @if (!item.IsApproved)
+                    {
+                        <button id="@item.Id" class="btn btn-secondary approveBtn">Approve</button>
+                    }
+                </td>
+            </tr>
         }
     </tbody>
 </table>

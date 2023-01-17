@@ -3,6 +3,7 @@ let count = canBeBorrowed.data("count");
 
 $(document).ready(function () {
     changeCountText();
+    getTags();
 });
 
 $(document).on('click', '.borrowBtn', function () {
@@ -20,6 +21,37 @@ $(document).on('click', '.borrowBtn', function () {
                 count--;
                 changeCountText();
 
+        }
+    });
+});
+
+$(document).on('keyup change', '.searchInput', function () {
+    let input = $(this).val();
+    if (input.length < 3) {
+        return;
+    }
+
+    $.ajax({
+        url: "/Autocomplete",
+        type: "GET",
+        data: { term: input },
+        success: function (response) {
+            $(".searchInput").autocomplete({
+                source: response.tags
+            });
+        }
+    });
+});
+
+$(function getTags() {
+    $.ajax({
+        url: "/Autocomplete",
+        type: "GET",
+        success: function (response) {
+            $(".searchInput").autocomplete({
+                minLength: 3,
+                source: response.tags
+            });
         }
     });
 });
@@ -66,7 +98,21 @@ $(document).on('click', '.borrowOrReturnBtn', function () {
         }
     });
 });
+/*
+$(document).on('click', '.searchBtn', function () {
+    let input = $(".searchInput").val();;
 
+    $.ajax({
+        url: "/Search",
+        type: "GET",
+        data: {
+            term: input,
+        },
+        success: function () {
+        }
+    });
+});
+*/
 function changeCountText() {
     canBeBorrowed.text(`You can borrow ${count} more books.`);
 }

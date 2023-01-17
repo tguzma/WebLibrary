@@ -28,3 +28,16 @@ $(".approveBtn").click(function () {
         }
     });
 });
+
+$(function getTags() {
+    $.ajax({
+        url: "/User/Autocomplete",
+        type: "GET",
+        success: function (response) {
+            $(".searchInput").autocomplete({
+                minLength: 3,
+                source: response.tags
+            });
+        }
+    });
+});

@@ -22,7 +22,7 @@ namespace WebLibrary.Models
         public int NumberOfPages { get; set; }
 
         [Display(Name = "Release year")]
-        public int YearOfRelease { get; set; }
+        public string YearOfRelease { get; set; }
         public string ImageUrl { get; set; }
 
         [Display(Name = "Amount avalible")]

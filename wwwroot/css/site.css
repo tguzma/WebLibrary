@@ -90,3 +90,7 @@ body {
     max-width: 300px;
     margin-left: 20px;
 }
+
+.searchForm {
+    margin-top: 20px;
+}
