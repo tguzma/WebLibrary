@@ -57,10 +57,10 @@
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Book" asp-action="BorrowedBooks">My Books</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="ExportImport" asp-action="Export">Export database</a>
+                                    <a class="nav-link text-dark exportDb" asp-area="" asp-controller="ExportImport">Export database</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="ExportImport" asp-action="Import">Import database</a>
+                                    <a class="nav-link text-dark importDb" asp-area="" asp-controller="ExportImport">Import database</a>
                                 </li>
                             }
                         }
@@ -110,6 +110,7 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/alertEI.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     @RenderSection("Scripts", required: false)
 </body>

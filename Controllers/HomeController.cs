@@ -1,11 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using WebLibrary.Models;
 
 namespace WebLibrary.Controllers
@@ -23,7 +18,7 @@ namespace WebLibrary.Controllers
         {
             if (_signInManager.IsSignedIn(User))
             {
-                return RedirectToAction(nameof(Index),"Book");
+                return RedirectToAction(nameof(Index), "Book");
             }
 
             return View();
