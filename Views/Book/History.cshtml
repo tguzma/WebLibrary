@@ -15,9 +15,6 @@
             <th>
                 Date borrowed
             </th>
-            <th>
-                Date returned
-            </th>
         </tr>
     </thead>
     <tbody>
@@ -34,16 +31,7 @@
                     <td>
                         @Html.DisplayFor(modelItem => item.DateBorrowed)
                     </td>                
-                    <td>
-                        @if (item.DateReturned.HasValue)
-                        {
-                            @Html.DisplayFor(modelItem => item.DateReturned)
-                        }
-                        else
-                        {
-                            <text>Not Returned yet</text>
-                        }
-                        </td>
+                    
                 </tr>
             }
         }
