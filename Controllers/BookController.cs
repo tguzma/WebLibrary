@@ -165,7 +165,8 @@ namespace WebLibrary.Controllers
 
             loan.BookId = bookId;
             loan.UserId = user.Id.ToString();
-            loan.CreatedAt = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd"));
+            loan.PersonalId = user.PersonalIdentificationNumber;
+            loan.CreatedAt = new DateTime();
             await _loanService.CreateAsync(loan);
 
             await _bookService.UpdatetAsync(book);
@@ -235,6 +236,7 @@ namespace WebLibrary.Controllers
 
                 loan.BookId = bookId;
                 loan.UserId = user.Id.ToString();
+                loan.PersonalId = user.PersonalIdentificationNumber;
                 loan.CreatedAt = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd"));
                 await _loanService.CreateAsync(loan);
             }

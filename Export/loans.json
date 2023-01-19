@@ -1,4 +1,4 @@
-{ "_id" : ObjectId("63c6761d495f09a21512d0c0"), "BookId" : "6390d6d65d16d5363f17b0c4", "UserId" : "860aee01-9949-4720-acdf-1ed4cb01e82e", "CreatedAt" : ISODate("2023-01-16T23:00:00Z") }
-{ "_id" : ObjectId("63c7bf577c5e184acb905fa2"), "BookId" : "6390d7245d16d5363f17b0c5", "UserId" : "860aee01-9949-4720-acdf-1ed4cb01e82e", "CreatedAt" : ISODate("2023-01-17T23:00:00Z") }
-{ "_id" : ObjectId("63c7ce6fc4697554a06b2434"), "BookId" : "6390d77e5d16d5363f17b0c7", "UserId" : "860aee01-9949-4720-acdf-1ed4cb01e82e", "CreatedAt" : ISODate("2023-01-17T23:00:00Z") }
-{ "_id" : ObjectId("63c7ce7dc4697554a06b2435"), "BookId" : "6390d6d65d16d5363f17b0c4", "UserId" : "a90c468e-cfd5-4760-a714-a9e286096b19", "CreatedAt" : ISODate("2023-01-17T23:00:00Z") }
+{ "_id" : ObjectId("63c6761d495f09a21512d0c0"), "UserId" : "860aee01-9949-4720-acdf-1ed4cb01e82e", "PersonalId" : null, "BookId" : "6390d6d65d16d5363f17b0c4", "CreatedAt" : ISODate("2023-01-16T23:00:00Z") }
+{ "_id" : ObjectId("63c7bf577c5e184acb905fa2"), "UserId" : "860aee01-9949-4720-acdf-1ed4cb01e82e", "PersonalId" : null, "BookId" : "6390d7245d16d5363f17b0c5", "CreatedAt" : ISODate("2023-01-17T23:00:00Z") }
+{ "_id" : ObjectId("63c7ce6fc4697554a06b2434"), "UserId" : "860aee01-9949-4720-acdf-1ed4cb01e82e", "PersonalId" : null, "BookId" : "6390d77e5d16d5363f17b0c7", "CreatedAt" : ISODate("2023-01-17T23:00:00Z") }
+{ "_id" : ObjectId("63c7ce7dc4697554a06b2435"), "UserId" : "a90c468e-cfd5-4760-a714-a9e286096b19", "PersonalId" : null, "BookId" : "6390d6d65d16d5363f17b0c4", "CreatedAt" : ISODate("2023-01-17T23:00:00Z") }
